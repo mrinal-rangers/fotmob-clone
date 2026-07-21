@@ -4,3 +4,11 @@ dist/
 .env.dev
 .env.prod
 *.log
+
+# per-project
+FOTMOB-CORE/node_modules/
+FOTMOB-CORE/dist/
+BFF/node_modules/
+BFF/dist/
+web-ui/node_modules/
+web-ui/dist/

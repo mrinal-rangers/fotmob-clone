@@ -1,0 +1,18 @@
+import "./config/env";
+import express from "express";
+import cors from "cors";
+import { config } from "./config/env";
+import routes from "./routes";
+import { errorHandler } from "./middleware/errorHandler";
+
+const app = express();
+app.use(cors({ origin: config.cors.origin }));
+app.use(express.json());
+
+app.get("/health", (_req, res) => res.json({ status: "ok", service: "core", timestamp: new Date().toISOString() }));
+
+app.use("/api", routes);
+app.use(errorHandler);
+
+app.listen(config.port, () => console.log(`[CORE] Running on port ${config.port}`));
+export default app;
