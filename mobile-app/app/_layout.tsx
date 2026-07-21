@@ -3,7 +3,7 @@ import { useFonts } from "expo-font";
 import { Stack, router, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
-import * as SecureStore from "expo-secure-store";
+import { Platform } from "react-native";
 import { useColorScheme } from "nativewind";
 import { View, Text, TouchableOpacity } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -22,22 +22,21 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const CLERK_PUBLISHABLE_KEY = "pk_test_ZmFpci1kYXNzaWUtNTUuY2xlcmsuYWNjb3VudHMuZGV2JA";
 
-const tokenCache = {
-  async getToken(key: string) {
-    try {
-      return SecureStore.getItemAsync(key);
-    } catch {
-      return null;
+const tokenCache = Platform.OS === "web"
+  ? {
+      async getToken(key: string) { return localStorage.getItem(key); },
+      async saveToken(key: string, value: string) { localStorage.setItem(key, value); },
     }
-  },
-  async saveToken(key: string, value: string) {
-    try {
-      return SecureStore.setItemAsync(key, value);
-    } catch {
-      return;
-    }
-  },
-};
+  : {
+      async getToken(key: string) {
+        try { const { getItemAsync } = await import("expo-secure-store"); return getItemAsync(key); }
+        catch { return null; }
+      },
+      async saveToken(key: string, value: string) {
+        try { const { setItemAsync } = await import("expo-secure-store"); setItemAsync(key, value); }
+        catch { return; }
+      },
+    };
 
 export { ErrorBoundary } from "expo-router";
 
