@@ -5,7 +5,7 @@ import { OAuth2Client } from "google-auth-library";
 import { config } from "../config/env";
 
 const JWT_SECRET = config.jwt.secret;
-const googleClient = new OAuth2Client(config.google.clientId);
+const googleClient = new OAuth2Client(config.auth.google.clientId);
 
 export class AuthService {
   private adminRepo = new AdminRepository();
@@ -40,13 +40,13 @@ export class AuthService {
   }
 
   async googleSignIn(idToken: string) {
-    if (!config.google.clientId) {
+    if (!config.auth.google.clientId) {
       throw new Error("Google Sign-In is not configured (missing GOOGLE_CLIENT_ID)");
     }
 
     const ticket = await googleClient.verifyIdToken({
       idToken,
-      audience: config.google.clientId,
+      audience: config.auth.google.clientId,
     });
 
     const payload = ticket.getPayload();
@@ -59,7 +59,7 @@ export class AuthService {
     const picture = payload.picture;
     const googleId = payload.sub;
 
-    if (!config.auth.adminEmails.includes(email)) {
+    if (!config.auth.admin.emails.includes(email)) {
       throw new Error("Unauthorized: this email is not registered as an admin");
     }
 

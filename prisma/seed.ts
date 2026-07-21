@@ -19,15 +19,15 @@ async function main() {
   await prisma.admin.deleteMany();
 
   const admin = await prisma.admin.upsert({
-    where: { email: config.seed.adminEmail },
+    where: { email: config.seed.admin.email },
     update: {
-      passwordHash: await bcrypt.hash(config.seed.adminPassword, 12),
+      passwordHash: await bcrypt.hash(config.seed.admin.password, 12),
       name: "Super Admin",
       role: "SUPER_ADMIN",
     },
     create: {
-      email: config.seed.adminEmail,
-      passwordHash: await bcrypt.hash(config.seed.adminPassword, 12),
+      email: config.seed.admin.email,
+      passwordHash: await bcrypt.hash(config.seed.admin.password, 12),
       name: "Super Admin",
       role: "SUPER_ADMIN",
     },
@@ -186,8 +186,8 @@ async function main() {
 
   console.log("\n✓ Seed completed successfully!");
   console.log("\nAdmin login:");
-  console.log(`  Email:    ${config.seed.adminEmail}`);
-  console.log(`  Password: ${config.seed.adminPassword}`);
+  console.log(`  Email:    ${config.seed.admin.email}`);
+  console.log(`  Password: ${config.seed.admin.password}`);
 }
 
 main()

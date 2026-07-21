@@ -10,38 +10,46 @@ dotenv.config({ path: path.resolve(__dirname, "../../", envFile) });
 dotenv.config({ path: path.resolve(__dirname, "../../", ".env"), override: true });
 
 export const config = {
-  port: parseInt(process.env.PORT || "3000", 10),
-  nodeEnv: process.env.NODE_ENV || "development",
-  isDev: (process.env.NODE_ENV || "development") !== "production",
-  isProd: process.env.NODE_ENV === "production",
+  env: {
+    name: process.env.FOTMOB_ENV || nodeEnv,
+    isDev: (process.env.FOTMOB_ENV || nodeEnv) === "development",
+    isProd: (process.env.FOTMOB_ENV || nodeEnv) === "production",
+  },
 
-  database: {
-    url: process.env.DATABASE_URL || "postgresql://localhost:5432/fotmob_clone",
+  server: {
+    port: parseInt(process.env.FOTMOB_PORT || "3000", 10),
+    corsOrigin: process.env.FOTMOB_CORS_ORIGIN || "http://localhost:5173",
+  },
+
+  db: {
+    url: process.env.FOTMOB_DB_URL || "",
   },
 
   jwt: {
-    secret: process.env.JWT_SECRET || "fallback-dev-secret",
-    expiresIn: process.env.JWT_EXPIRES_IN || "24h",
-  },
-
-  google: {
-    clientId: process.env.GOOGLE_CLIENT_ID || "",
+    secret: process.env.FOTMOB_JWT_SECRET || "",
+    expiresIn: process.env.FOTMOB_JWT_EXPIRES_IN || "24h",
   },
 
   auth: {
-    adminEmails: (process.env.ADMIN_EMAILS || "").split(",").map((e: string) => e.trim()).filter(Boolean),
+    google: {
+      clientId: process.env.FOTMOB_AUTH_GOOGLE_CLIENT_ID || "",
+    },
+    admin: {
+      emails: (process.env.FOTMOB_AUTH_ADMIN_EMAILS || "")
+        .split(",")
+        .map((e: string) => e.trim())
+        .filter(Boolean),
+    },
   },
 
   seed: {
-    adminEmail: process.env.SEED_ADMIN_EMAIL || "admin@fotmob.com",
-    adminPassword: process.env.SEED_ADMIN_PASSWORD || "admin123",
+    admin: {
+      email: process.env.FOTMOB_SEED_ADMIN_EMAIL || "admin@fotmob.com",
+      password: process.env.FOTMOB_SEED_ADMIN_PASSWORD || "admin123",
+    },
   },
 
-  cors: {
-    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
-  },
-
-  logging: {
-    level: process.env.LOG_LEVEL || (process.env.NODE_ENV === "production" ? "info" : "debug"),
+  log: {
+    level: process.env.FOTMOB_LOG_LEVEL || (process.env.FOTMOB_ENV === "production" ? "info" : "debug"),
   },
 };

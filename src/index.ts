@@ -8,22 +8,22 @@ import { config } from "./config/env";
 
 const app = express();
 
-app.use(cors({ origin: config.cors.origin }));
+app.use(cors({ origin: config.server.corsOrigin }));
 app.use(express.json());
 
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString(), env: config.nodeEnv });
+  res.json({ status: "ok", timestamp: new Date().toISOString(), env: config.env.name });
 });
 
 app.use("/api", routes);
 
 app.use(errorHandler);
 
-app.listen(config.port, () => {
-  console.log(`[${config.nodeEnv}] Server running on http://localhost:${config.port}`);
-  console.log(`[${config.nodeEnv}] Health check: http://localhost:${config.port}/health`);
-  console.log(`[${config.nodeEnv}] API base: http://localhost:${config.port}/api`);
-  console.log(`[${config.nodeEnv}] Log level: ${config.logging.level}`);
+app.listen(config.server.port, () => {
+  console.log(`[${config.env.name}] Server running on http://localhost:${config.server.port}`);
+  console.log(`[${config.env.name}] Health check: http://localhost:${config.server.port}/health`);
+  console.log(`[${config.env.name}] API base: http://localhost:${config.server.port}/api`);
+  console.log(`[${config.env.name}] Log level: ${config.log.level}`);
 });
 
 export default app;
