@@ -1,11 +1,11 @@
 {
     "expo": {
-        "name": "fotmob-clone",
-        "slug": "fotmob-clone",
+        "name": "FootPulse",
+        "slug": "footpulse",
         "version": "1.0.0",
         "orientation": "portrait",
         "icon": "./assets/images/icon.png",
-        "scheme": "fotmobclone",
+        "scheme": "footpulse",
         "userInterfaceStyle": "automatic",
         "splash": {
             "image": "./assets/images/splash.png",
@@ -14,7 +14,7 @@
         },
         "assetBundlePatterns": ["**/*"],
         "ios": {
-            "bundleIdentifier": "com.fotmobclone.app",
+            "bundleIdentifier": "com.footpulse.app",
             "supportsTablet": true
         },
         "android": {
@@ -22,12 +22,13 @@
                 "foregroundImage": "./assets/images/adaptive-icon.png",
                 "backgroundColor": "#FFFFFF"
             },
-            "package": "com.fotmobclone.app"
+            "package": "com.footpulse.app"
         },
         "web": {
             "bundler": "metro",
             "output": "static",
-            "favicon": "./assets/images/favicon.png"
+            "favicon": "./assets/images/favicon.png",
+            "name": "FootPulse"
         },
         "plugins": ["expo-router"],
         "experiments": {

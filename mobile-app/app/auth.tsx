@@ -1,6 +1,6 @@
 import { useOAuth, useUser, useAuth } from "@clerk/clerk-expo";
 import { useEffect } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Image } from "react-native";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
@@ -65,7 +65,8 @@ export default function AuthScreen() {
 
   return (
     <View className="flex-1 items-center justify-center bg-white px-8 dark:bg-[#1A1A1A]">
-      <Text className="mb-2 text-4xl font-bold dark:text-white">FotMob</Text>
+      <Image source={require("../assets/images/icon.png")} style={{ width: 80, height: 80 }} className="mb-4 rounded-2xl" />
+      <Text className="mb-2 text-4xl font-bold dark:text-white">FootPulse</Text>
       <Text className="mb-12 text-lg text-gray-500 dark:text-gray-400">
         Sign in to follow your teams
       </Text>

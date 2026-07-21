@@ -49,7 +49,7 @@ export default function HomeScreen() {
                 <View className="flex-row items-center justify-between px-4 py-2">
                     <TouchableOpacity>
                         <Text className="text-2xl font-bold uppercase dark:text-white">
-                            FotMob
+                            FootPulse
                         </Text>
                     </TouchableOpacity>
 
