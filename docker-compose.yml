@@ -1,0 +1,28 @@
+services:
+  core:
+    build: ./FOTMOB-CORE
+    ports:
+      - "4000:4000"
+    env_file: ./FOTMOB-CORE/.env
+    volumes:
+      - ./FOTMOB-CORE/src:/app/src
+      - ./FOTMOB-CORE/prisma:/app/prisma
+
+  bff:
+    build: ./BFF
+    ports:
+      - "4001:4001"
+    env_file: ./BFF/.env
+    volumes:
+      - ./BFF/src:/app/src
+    depends_on:
+      - core
+
+  web-ui:
+    build: ./web-ui
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./web-ui/src:/app/src
+    depends_on:
+      - bff
