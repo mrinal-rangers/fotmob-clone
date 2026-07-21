@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth";
 import { validate } from "../middleware/validation";
-import { CreateMatchEventSchema, UpdateMatchStatusSchema } from "../types";
+import { CreateMatchEventSchema, UpdateMatchStatusSchema, GoogleSignInSchema } from "../types";
 import { recordMatchEvent, updateMatchStatus } from "../controllers/AdminController";
-import { register, login } from "../controllers/AuthController";
+import { register, login, googleSignIn } from "../controllers/AuthController";
 import { LoginSchema } from "../types";
 import { createLeague } from "../controllers/LeagueController";
 import { CreateLeagueSchema } from "../types";
@@ -22,6 +22,7 @@ const router = Router();
 
 router.post("/auth/register", validate(LoginSchema), register);
 router.post("/auth/login", validate(LoginSchema), login);
+router.post("/auth/google", validate(GoogleSignInSchema), googleSignIn);
 
 router.use(requireAuth);
 

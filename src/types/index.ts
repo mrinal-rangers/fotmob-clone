@@ -105,6 +105,10 @@ export const LoginSchema = z.object({
   password: z.string().min(6),
 });
 
+export const GoogleSignInSchema = z.object({
+  idToken: z.string().min(1),
+});
+
 export const SearchSchema = z.object({
   q: z.string().min(1),
   type: z.enum(["players", "teams", "leagues"]).optional(),

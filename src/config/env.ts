@@ -24,6 +24,14 @@ export const config = {
     expiresIn: process.env.JWT_EXPIRES_IN || "24h",
   },
 
+  google: {
+    clientId: process.env.GOOGLE_CLIENT_ID || "",
+  },
+
+  auth: {
+    adminEmails: (process.env.ADMIN_EMAILS || "").split(",").map((e: string) => e.trim()).filter(Boolean),
+  },
+
   cors: {
     origin: process.env.CORS_ORIGIN || "http://localhost:5173",
   },
@@ -31,4 +39,4 @@ export const config = {
   logging: {
     level: process.env.LOG_LEVEL || (process.env.NODE_ENV === "production" ? "info" : "debug"),
   },
-} as const;
+};

@@ -254,8 +254,10 @@ model News {
 model Admin {
   id           String    @id @default(uuid())
   email        String    @unique
-  passwordHash String
+  googleId     String?   @unique
+  passwordHash String?
   name         String
+  picture      String?
   role         AdminRole @default(ADMIN)
   createdAt    DateTime  @default(now())
 

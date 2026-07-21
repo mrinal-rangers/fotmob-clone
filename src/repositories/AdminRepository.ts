@@ -14,6 +14,38 @@ export class AdminRepository extends BaseRepository {
     return this.prisma.admin.findUnique({ where: { email } });
   }
 
+  async findByGoogleId(googleId: string): Promise<Admin | null> {
+    return this.prisma.admin.findUnique({ where: { googleId } });
+  }
+
+  async upsertByEmail(
+    email: string,
+    data: { googleId?: string; name?: string; picture?: string; role?: string }
+  ): Promise<Admin> {
+    const existing = await this.findByEmail(email);
+    if (existing) {
+      return this.prisma.admin.update({
+        where: { email },
+        data: {
+          googleId: data.googleId || existing.googleId,
+          name: data.name || existing.name,
+          picture: data.picture || existing.picture,
+          role: (data.role || existing.role) as any,
+          passwordHash: existing.passwordHash,
+        },
+      });
+    }
+    return this.prisma.admin.create({
+      data: {
+        email,
+        googleId: data.googleId,
+        name: data.name || email,
+        picture: data.picture,
+        role: (data.role as any) || "ADMIN",
+      },
+    });
+  }
+
   async findAll(): Promise<Admin[]> {
     return this.prisma.admin.findMany();
   }

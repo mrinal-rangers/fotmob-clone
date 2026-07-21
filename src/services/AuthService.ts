@@ -1,8 +1,11 @@
 import { AdminRepository } from "../repositories/AdminRepository";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { OAuth2Client } from "google-auth-library";
+import { config } from "../config/env";
 
-const JWT_SECRET = process.env.JWT_SECRET || "super-secret-jwt-key-change-in-production";
+const JWT_SECRET = config.jwt.secret;
+const googleClient = new OAuth2Client(config.google.clientId);
 
 export class AuthService {
   private adminRepo = new AdminRepository();
@@ -24,6 +27,8 @@ export class AuthService {
     const admin = await this.adminRepo.findByEmail(email);
     if (!admin) throw new Error("Invalid credentials");
 
+    if (!admin.passwordHash) throw new Error("This account uses Google Sign-In");
+
     const valid = await bcrypt.compare(password, admin.passwordHash);
     if (!valid) throw new Error("Invalid credentials");
 
@@ -31,7 +36,44 @@ export class AuthService {
       expiresIn: "24h",
     });
 
-    return { token, admin: { id: admin.id, email: admin.email, name: admin.name, role: admin.role } };
+    return { token, admin: { id: admin.id, email: admin.email, name: admin.name, role: admin.role, picture: admin.picture } };
+  }
+
+  async googleSignIn(idToken: string) {
+    if (!config.google.clientId) {
+      throw new Error("Google Sign-In is not configured (missing GOOGLE_CLIENT_ID)");
+    }
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken,
+      audience: config.google.clientId,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) {
+      throw new Error("Invalid Google token");
+    }
+
+    const email = payload.email;
+    const name = payload.name || email;
+    const picture = payload.picture;
+    const googleId = payload.sub;
+
+    if (!config.auth.adminEmails.includes(email)) {
+      throw new Error("Unauthorized: this email is not registered as an admin");
+    }
+
+    const admin = await this.adminRepo.upsertByEmail(email, {
+      googleId,
+      name,
+      picture,
+    });
+
+    const token = jwt.sign({ id: admin.id, email: admin.email, role: admin.role }, JWT_SECRET, {
+      expiresIn: "24h",
+    });
+
+    return { token, admin: { id: admin.id, email: admin.email, name: admin.name, role: admin.role, picture: admin.picture } };
   }
 
   verifyToken(token: string) {

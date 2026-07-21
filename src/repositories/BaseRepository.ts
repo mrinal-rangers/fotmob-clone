@@ -9,8 +9,9 @@ export class BaseRepository {
   }
 
   async executeTransaction<T>(
-    fn: (tx: Prisma.TransactionClient) => Promise<T>
+    fn: (tx: Prisma.TransactionClient) => Promise<T>,
+    timeout = 15000
   ): Promise<T> {
-    return this.prisma.$transaction(fn);
+    return this.prisma.$transaction(fn, { timeout, maxWait: 5000 });
   }
 }

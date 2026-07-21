@@ -172,8 +172,8 @@ export class MatchService {
     const matchWithLeague = match as any;
     const leagueSeason = matchWithLeague.league?.season || "2025/2026";
 
-    return this.matchRepo.executeTransaction(async (tx: Prisma.TransactionClient) => {
-      const event = await tx.matchEvent.create({
+    const event = await this.matchRepo.executeTransaction(async (tx: Prisma.TransactionClient) => {
+      const txEvent = await tx.matchEvent.create({
         data: {
           matchId: data.matchId,
           teamId: data.teamId,
@@ -336,7 +336,6 @@ export class MatchService {
           },
         });
 
-        await this.standingRepo.recalculatePositions(match.leagueId);
       }
 
       if (data.type === "YELLOW_CARD" && data.playerId) {
@@ -379,8 +378,12 @@ export class MatchService {
         });
       }
 
-      return event;
-    });
+      return txEvent;
+    }, 20000);
+
+    await this.standingRepo.recalculatePositions(match.leagueId);
+
+    return event;
   }
 
   async getMatchEvents(matchId: string) {
