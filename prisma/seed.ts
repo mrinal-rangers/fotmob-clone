@@ -1,5 +1,6 @@
 import { PrismaClient, LeagueType, PlayerPosition, TransferType, NewsCategory } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { config } from "../src/config/env";
 
 const prisma = new PrismaClient();
 
@@ -17,10 +18,16 @@ async function main() {
   await prisma.league.deleteMany();
   await prisma.admin.deleteMany();
 
-  const admin = await prisma.admin.create({
-    data: {
-      email: "admin@fotmob.com",
-      passwordHash: await bcrypt.hash("admin123", 12),
+  const admin = await prisma.admin.upsert({
+    where: { email: config.seed.adminEmail },
+    update: {
+      passwordHash: await bcrypt.hash(config.seed.adminPassword, 12),
+      name: "Super Admin",
+      role: "SUPER_ADMIN",
+    },
+    create: {
+      email: config.seed.adminEmail,
+      passwordHash: await bcrypt.hash(config.seed.adminPassword, 12),
       name: "Super Admin",
       role: "SUPER_ADMIN",
     },
@@ -179,8 +186,8 @@ async function main() {
 
   console.log("\n✓ Seed completed successfully!");
   console.log("\nAdmin login:");
-  console.log("  Email:    admin@fotmob.com");
-  console.log("  Password: admin123");
+  console.log(`  Email:    ${config.seed.adminEmail}`);
+  console.log(`  Password: ${config.seed.adminPassword}`);
 }
 
 main()

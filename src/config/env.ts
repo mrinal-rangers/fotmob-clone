@@ -32,6 +32,11 @@ export const config = {
     adminEmails: (process.env.ADMIN_EMAILS || "").split(",").map((e: string) => e.trim()).filter(Boolean),
   },
 
+  seed: {
+    adminEmail: process.env.SEED_ADMIN_EMAIL || "admin@fotmob.com",
+    adminPassword: process.env.SEED_ADMIN_PASSWORD || "admin123",
+  },
+
   cors: {
     origin: process.env.CORS_ORIGIN || "http://localhost:5173",
   },

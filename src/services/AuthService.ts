@@ -33,8 +33,8 @@ export class AuthService {
     if (!valid) throw new Error("Invalid credentials");
 
     const token = jwt.sign({ id: admin.id, email: admin.email, role: admin.role }, JWT_SECRET, {
-      expiresIn: "24h",
-    });
+      expiresIn: config.jwt.expiresIn,
+    } as jwt.SignOptions);
 
     return { token, admin: { id: admin.id, email: admin.email, name: admin.name, role: admin.role, picture: admin.picture } };
   }
@@ -70,8 +70,8 @@ export class AuthService {
     });
 
     const token = jwt.sign({ id: admin.id, email: admin.email, role: admin.role }, JWT_SECRET, {
-      expiresIn: "24h",
-    });
+      expiresIn: config.jwt.expiresIn,
+    } as jwt.SignOptions);
 
     return { token, admin: { id: admin.id, email: admin.email, name: admin.name, role: admin.role, picture: admin.picture } };
   }
