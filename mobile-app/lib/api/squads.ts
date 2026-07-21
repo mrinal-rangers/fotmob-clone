@@ -1,21 +1,23 @@
-import axios from 'axios'
-
-import { headers } from '@/lib/api/headers'
+import api from "./client";
 
 export const fetchSquad = async (teamId: string) => {
-    const options = {
-        method: 'GET',
-        url: 'https://api-football-v1.p.rapidapi.com/v3/players/squads',
-        params: {
-            team: teamId,
-        },
-        headers,
-    }
-
-    try {
-        const response = await axios.request(options)
-        return response.data
-    } catch (error) {
-        console.error(error)
-    }
-}
+  const { data: team } = await api.get(`/teams/${teamId}`);
+  const players = (team.players || []).map((p: any) => ({
+    id: parseInt(p.id.replace(/-/g, "").slice(0, 9), 16) || Math.floor(Math.random() * 1000000),
+    name: p.name,
+    age: p.dateOfBirth ? Math.floor((Date.now() - new Date(p.dateOfBirth).getTime()) / 31557600000) : 0,
+    number: p.shirtNumber || null,
+    position: p.position || "",
+    photo: p.photoUrl || "",
+  }));
+  return {
+    response: [{
+      team: {
+        id: parseInt(team.id.replace(/-/g, "").slice(0, 9), 16) || 0,
+        name: team.name,
+        logo: team.logoUrl || "",
+      },
+      players,
+    }],
+  };
+};

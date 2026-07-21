@@ -6,6 +6,7 @@ import matchRoutes from "./matchRoutes";
 import transferRoutes from "./transferRoutes";
 import newsRoutes from "./newsRoutes";
 import searchRoutes from "./searchRoutes";
+import userRoutes from "./userRoutes";
 import adminRoutes from "./adminRoutes";
 import { registerLeaguePlayerRoutes } from "./playerRoutes";
 
@@ -18,6 +19,7 @@ router.use("/matches", matchRoutes);
 router.use("/transfers", transferRoutes);
 router.use("/news", newsRoutes);
 router.use("/search", searchRoutes);
+router.use("/users", userRoutes);
 router.use("/admin", adminRoutes);
 
 registerLeaguePlayerRoutes(router);

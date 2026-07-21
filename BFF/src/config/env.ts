@@ -27,4 +27,9 @@ export const config = {
   auth: {
     adminEmails: (process.env.ADMIN_EMAILS || "").split(",").map((s: string) => s.trim()).filter(Boolean),
   },
+
+  clerk: {
+    secretKey: process.env.CLERK_SECRET_KEY || "",
+    publishableKey: process.env.CLERK_PUBLISHABLE_KEY || "",
+  },
 };

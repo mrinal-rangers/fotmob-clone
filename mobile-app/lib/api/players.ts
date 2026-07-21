@@ -1,117 +1,64 @@
-import axios from 'axios'
+import api from "./client";
 
-import { headers } from '@/lib/api/headers'
+function transformPlayer(player: any) {
+  const age = player.dateOfBirth
+    ? Math.floor((Date.now() - new Date(player.dateOfBirth).getTime()) / 31557600000)
+    : 0;
+  return {
+    player: {
+      id: parseInt(player.id.replace(/-/g, "").slice(0, 9), 16) || Math.floor(Math.random() * 1000000),
+      name: player.name,
+      firstname: player.name?.split(" ")[0] || "",
+      lastname: player.name?.split(" ").slice(1).join(" ") || "",
+      age,
+      birth: { date: player.dateOfBirth || "", place: player.nationality || "", country: player.nationality || "" },
+      nationality: player.nationality || "",
+      height: player.height ? `${player.height} cm` : "",
+      weight: player.weight ? `${player.weight} kg` : "",
+      injured: false,
+      photo: player.photoUrl || "",
+    },
+    statistics: [{
+      team: { id: 0, name: "", logo: "" },
+      league: { id: 0, name: "", country: "", logo: "", flag: null, season: 2025 },
+      games: { appearences: 0, lineups: 0, minutes: 0, number: player.shirtNumber || null, position: player.position || "", rating: "", captain: false },
+      substitutes: { in: 0, out: 0, bench: 0 },
+      shots: { total: null, on: null },
+      goals: { total: null, conceded: null, assists: null, saves: null },
+      passes: { total: null, key: null, accuracy: null },
+      tackles: { total: null, blocks: null, interceptions: null },
+      duels: { total: null, won: null },
+      dribbles: { attempts: null, success: null, past: null },
+      fouls: { drawn: null, committed: null },
+      cards: { yellow: null, yellowred: null, red: null },
+      penalty: { won: null, commited: null, scored: null, missed: null, saved: null },
+    }],
+  };
+}
 
 export const fetchPlayerByPlayerId = async (playerId: string) => {
-    const options = {
-        method: 'GET',
-        url: 'https://api-football-v1.p.rapidapi.com/v3/players',
-        params: {
-            id: playerId,
-            season: '2023',
-        },
-        headers,
-    }
+  const { data: player } = await api.get(`/players/${playerId}`);
+  return { response: [transformPlayer(player)] };
+};
 
-    try {
-        const response = await axios.request(options)
-        return response.data
-    } catch (error) {
-        console.error(error)
-    }
-}
+export const fetchPlayersByTeamId = async (_season: string, teamId: string) => {
+  const { data: team } = await api.get(`/teams/${teamId}`);
+  return { response: (team.players || []).map(transformPlayer) };
+};
 
-export const fetchPlayersByTeamId = async (season: string, teamId: string) => {
-    const options = {
-        method: 'GET',
-        url: 'https://api-football-v1.p.rapidapi.com/v3/players',
-        params: {
-            season: season,
-            team: teamId,
-        },
-        headers,
-    }
+export const fetchTopScorers = async (leagueId: string, _season: string) => {
+  const { data: standings } = await api.get(`/leagues/${leagueId}/standings`);
+  return { response: [] };
+};
 
-    try {
-        const response = await axios.request(options)
-        return response.data
-    } catch (error) {
-        console.error(error)
-    }
-}
+export const fetchTopAssists = async (_leagueId: string, _season: string) => {
+  return { response: [] };
+};
 
-export const fetchTopScorers = async (leagueId: string, season: string) => {
-    const options = {
-        method: 'GET',
-        url: 'https://api-football-v1.p.rapidapi.com/v3/players/topscorers',
-        params: {
-            league: leagueId,
-            season: season,
-        },
-        headers,
-    }
+export const fetchTopYellowCards = async (_leagueId: string, _season: string) => {
+  return { response: [] };
+};
 
-    try {
-        const response = await axios.request(options)
-        return response.data
-    } catch (error) {
-        console.error(error)
-    }
-}
-
-export const fetchTopAssists = async (leagueId: string, season: string) => {
-    const options = {
-        method: 'GET',
-        url: 'https://api-football-v1.p.rapidapi.com/v3/players/topassists',
-        params: {
-            league: leagueId,
-            season: season,
-        },
-        headers,
-    }
-
-    try {
-        const response = await axios.request(options)
-        return response.data
-    } catch (error) {
-        console.error(error)
-    }
-}
-
-export const fetchTopYellowCards = async (leagueId: string, season: string) => {
-    const options = {
-        method: 'GET',
-        url: 'https://api-football-v1.p.rapidapi.com/v3/players/topyellowcards',
-        params: {
-            league: leagueId,
-            season: season,
-        },
-        headers,
-    }
-
-    try {
-        const response = await axios.request(options)
-        return response.data
-    } catch (error) {
-        console.error(error)
-    }
-}
-
-export const fetchTopRedCards = async (leagueId: string, season: string) => {
-    const options = {
-        method: 'GET',
-        url: 'https://api-football-v1.p.rapidapi.com/v3/players/topredcards',
-        params: {
-            league: leagueId,
-            season: season,
-        },
-        headers,
-    }
-
-    try {
-        const response = await axios.request(options)
-        return response.data
-    } catch (error) {
-        console.error(error)
-    }
-}
+export const fetchTopRedCards = async (_leagueId: string, _season: string) => {
+  return { response: [] };
+};

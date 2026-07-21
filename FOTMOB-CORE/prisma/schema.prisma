@@ -263,3 +263,43 @@ model Admin {
 
   @@map("admins")
 }
+
+enum FollowEntityType {
+  PLAYER
+  TEAM
+  LEAGUE
+  COUNTRY
+}
+
+model User {
+  id        String   @id @default(uuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String?
+  avatarUrl String?
+
+  theme      String @default("system")
+  language   String @default("en")
+  unitSystem String @default("metric")
+  timezone   String @default("UTC")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  follows UserFollow[]
+
+  @@map("users")
+}
+
+model UserFollow {
+  id         String           @id @default(uuid())
+  userId     String
+  entityType FollowEntityType
+  entityId   String
+  createdAt  DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, entityType, entityId])
+  @@map("user_follows")
+}
