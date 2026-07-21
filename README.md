@@ -17,6 +17,12 @@ The `mobile-app/` is cloned from [nickng852/fotmob-clone](https://github.com/nic
 
 ## Quick Start
 
+### Docker (all 3 servers)
+```bash
+docker compose up --build
+```
+
+### Manual
 ```bash
 cd FOTMOB-CORE && npm install && npx prisma generate && npm run dev
 cd BFF         && npm install && npm run dev
@@ -24,4 +30,9 @@ cd web-ui      && npm install && npm run dev
 cd mobile-app  && npm install && npx expo start
 ```
 
-FOTMOB-CORE runs on `:4000`, BFF on `:4001`, web-ui on `:5173`.
+### Ports
+| Service | Port |
+|---------|------|
+| FOTMOB-CORE | `:4000` |
+| BFF | `:4001` |
+| web-ui | `:5173` |
