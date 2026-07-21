@@ -20,7 +20,7 @@ import {
 } from "@react-navigation/native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || "pk_test_your_key";
+const CLERK_PUBLISHABLE_KEY = "pk_test_ZmFpci1kYXNzaWUtNTUuY2xlcmsuYWNjb3VudHMuZGV2JA";
 
 const tokenCache = {
   async getToken(key: string) {
