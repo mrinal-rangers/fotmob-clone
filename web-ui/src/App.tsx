@@ -1,38 +1,41 @@
-import { Routes, Route, Link } from "react-router-dom";
-import { useAuth } from "./hooks/useAuth";
-import LoginPage from "./pages/LoginPage";
-import DashboardPage from "./pages/DashboardPage";
-import LeaguePage from "./pages/LeaguePage";
-import MatchDetailPage from "./pages/MatchDetailPage";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "@clerk/clerk-react";
+import { setTokenProvider } from "@/lib/api";
+import { useEffect } from "react";
+import { RootLayout } from "@/layouts/root-layout";
+import { LoginPage } from "@/pages/LoginPage";
+import { HomePage } from "@/pages/HomePage";
+import { LeaguesPage } from "@/pages/LeaguesPage";
+import { LeagueDetailPage } from "@/pages/LeagueDetailPage";
+import { MatchDetailPage } from "@/pages/MatchDetailPage";
+import { TeamDetailPage } from "@/pages/TeamDetailPage";
+import { FollowingPage } from "@/pages/FollowingPage";
+import { SettingsPage } from "@/pages/SettingsPage";
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isLoaded, isSignedIn } = useAuth();
+  if (!isLoaded) return <div className="flex h-screen items-center justify-center">Loading...</div>;
+  if (!isSignedIn) return <Navigate to="/login" replace />;
+  return <RootLayout>{children}</RootLayout>;
+}
 
 export default function App() {
-  const { admin, token, logout } = useAuth();
+  const { getToken } = useAuth();
+
+  useEffect(() => {
+    setTokenProvider(() => getToken({ template: undefined }));
+  }, [getToken]);
 
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", padding: "1rem" }}>
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-        <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
-          <h1 style={{ margin: 0 }}>FotMob Clone</h1>
-        </Link>
-        <nav>
-          {admin ? (
-            <span>
-              Welcome, {admin.name}
-              {admin.picture && <img src={admin.picture} alt="" width={24} height={24} style={{ borderRadius: "50%", margin: "0 0.5rem", verticalAlign: "middle" }} />}
-              <button onClick={logout} style={{ marginLeft: "0.5rem" }}>Logout</button>
-            </span>
-          ) : (
-            <Link to="/login">Login</Link>
-          )}
-        </nav>
-      </header>
-
-      <Routes>
-        <Route path="/" element={token ? <DashboardPage /> : <LoginPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/leagues/:id" element={<LeaguePage />} />
-        <Route path="/matches/:id" element={<MatchDetailPage />} />
-      </Routes>
-    </div>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+      <Route path="/leagues" element={<ProtectedRoute><LeaguesPage /></ProtectedRoute>} />
+      <Route path="/leagues/:id" element={<ProtectedRoute><LeagueDetailPage /></ProtectedRoute>} />
+      <Route path="/matches/:id" element={<ProtectedRoute><MatchDetailPage /></ProtectedRoute>} />
+      <Route path="/teams/:id" element={<ProtectedRoute><TeamDetailPage /></ProtectedRoute>} />
+      <Route path="/following" element={<ProtectedRoute><FollowingPage /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+    </Routes>
   );
 }

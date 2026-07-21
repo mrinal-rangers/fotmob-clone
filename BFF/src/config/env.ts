@@ -15,15 +15,6 @@ export const config = {
     apiKey: process.env.CORE_API_KEY || "",
   },
 
-  jwt: {
-    secret: process.env.JWT_SECRET || "fallback-bff-secret",
-    expiresIn: process.env.JWT_EXPIRES_IN || "24h",
-  },
-
-  google: {
-    clientId: process.env.GOOGLE_CLIENT_ID || "",
-  },
-
   auth: {
     adminEmails: (process.env.ADMIN_EMAILS || "").split(",").map((s: string) => s.trim()).filter(Boolean),
   },

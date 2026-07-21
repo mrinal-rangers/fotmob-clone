@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { AuthRequest } from "../middleware/clerkAuth";
+import { AuthRequest } from "../middleware/auth";
 import { proxy } from "../services/ProxyService";
 
 export async function getMe(req: AuthRequest, res: Response) {

@@ -1,9 +1,5 @@
-import { Router } from "express";
-import { validate } from "../middleware/validation";
-import { GoogleSignInSchema } from "../types";
+import { Router, Request, Response } from "express";
 import { requireAuth } from "../middleware/auth";
-import { requireClerkAuth } from "../middleware/clerkAuth";
-import { googleSignIn } from "../controllers/AuthController";
 import { proxyGet, proxyPost, proxyPatch, proxyDelete } from "../controllers/ProxyController";
 import { getMe, updatePreferences, getFollows, followEntity, unfollowEntity } from "../controllers/UserController";
 
@@ -11,21 +7,17 @@ const router = Router();
 
 router.get("/health", (_req, res) => res.json({ status: "ok", service: "bff", timestamp: new Date().toISOString() }));
 
-router.post("/auth/google", validate(GoogleSignInSchema), googleSignIn);
+router.get("/auth/me", requireAuth, (req: any, res: Response) => res.json(req.user));
 
-router.post("/auth/clerk", requireClerkAuth, (req: any, res: any) => res.json(req.user));
+router.get("/users/me", requireAuth, getMe);
+router.patch("/users/me/preferences", requireAuth, updatePreferences);
+router.get("/users/me/follows", requireAuth, getFollows);
+router.post("/users/me/follows", requireAuth, followEntity);
+router.delete("/users/me/follows/:followId", requireAuth, unfollowEntity);
 
-router.get("/users/me", requireClerkAuth, getMe);
-router.patch("/users/me/preferences", requireClerkAuth, updatePreferences);
-router.get("/users/me/follows", requireClerkAuth, getFollows);
-router.post("/users/me/follows", requireClerkAuth, followEntity);
-router.delete("/users/me/follows/:followId", requireClerkAuth, unfollowEntity);
-
-router.use(requireAuth);
-
-router.get("/*", proxyGet);
-router.post("/*", proxyPost);
-router.patch("/*", proxyPatch);
-router.delete("/*", proxyDelete);
+router.get("/*", requireAuth, proxyGet);
+router.post("/*", requireAuth, proxyPost);
+router.patch("/*", requireAuth, proxyPatch);
+router.delete("/*", requireAuth, proxyDelete);
 
 export default router;

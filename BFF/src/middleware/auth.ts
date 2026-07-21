@@ -1,23 +1,52 @@
 import { Request, Response, NextFunction } from "express";
-import { AuthService } from "../services/AuthService";
+import { createClerkClient } from "@clerk/clerk-sdk-node";
+import { config } from "../config/env";
+import { proxy } from "../services/ProxyService";
 
-const authService = new AuthService();
+const clerkClient = createClerkClient({ secretKey: config.clerk.secretKey });
 
 export interface AuthRequest extends Request {
-  admin?: { sub: string; email: string; name: string; picture?: string };
+  user?: {
+    id: string;
+    clerkId: string;
+    email: string;
+    name: string;
+    avatarUrl: string | null;
+    isAdmin: boolean;
+  };
 }
 
-export function requireAuth(req: AuthRequest, res: Response, next: NextFunction) {
+export async function requireAuth(req: AuthRequest, res: Response, next: NextFunction) {
   const header = req.headers.authorization;
   if (!header || !header.startsWith("Bearer ")) {
     return res.status(401).json({ error: "Authentication required" });
   }
 
-  const decoded = authService.verifyToken(header.slice(7));
-  if (!decoded) {
-    return res.status(401).json({ error: "Invalid or expired token" });
+  const token = header.slice(7);
+  if (!token) {
+    return res.status(401).json({ error: "Invalid token" });
   }
 
-  req.admin = decoded;
-  next();
+  try {
+    const claims = await clerkClient.verifyToken(token) as Record<string, any>;
+    const clerkId = claims.sub;
+    const email = claims.email || "";
+    const name = claims.name || claims.given_name || "";
+    const avatarUrl = claims.picture || null;
+
+    const user = await proxy.post("/users/sync", {
+      clerkId,
+      email,
+      name,
+      avatarUrl,
+    }) as { id: string; clerkId: string; email: string; name: string; avatarUrl: string | null };
+
+    const adminEmails = config.auth.adminEmails;
+    const isAdmin = adminEmails.includes(email);
+
+    req.user = { ...user, isAdmin };
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: "Invalid or expired session" });
+  }
 }
