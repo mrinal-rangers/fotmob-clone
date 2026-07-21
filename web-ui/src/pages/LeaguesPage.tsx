@@ -1,57 +1,65 @@
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { useLeagues } from "@/hooks/use-leagues";
-import { Input } from "@/lib/shadcn-ui/input";
-import { Card, CardContent, CardTitle } from "@/lib/shadcn-ui/card";
-import { Search } from "lucide-react";
+import { fetchLeagues } from "@/lib/api";
+import { Card, CardContent } from "@/lib/shadcn-ui/card";
+import { Skeleton } from "@/components/shared/ErrorStates";
+import { Trophy } from "lucide-react";
 
 export function LeaguesPage() {
-  const { data: leagues, isLoading } = useLeagues();
-  const [search, setSearch] = useState("");
+  const { data: leagues, isLoading, error } = useQuery({ queryKey: ["leagues"], queryFn: fetchLeagues });
 
-  const filtered = leagues?.filter(
-    (l) =>
-      l.name.toLowerCase().includes(search.toLowerCase()) ||
-      l.country.toLowerCase().includes(search.toLowerCase()),
-  );
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-bold">Leagues</h1>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 12 }).map((_, i) => <Skeleton key={i} className="h-24" />)}
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !leagues) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-bold">Leagues</h1>
+        <p className="text-muted-foreground">Unable to load leagues. Please try again later.</p>
+      </div>
+    );
+  }
+
+  const grouped = leagues.reduce<Record<string, typeof leagues>>((acc, l) => {
+    const country = l.country || "Other";
+    if (!acc[country]) acc[country] = [];
+    acc[country].push(l);
+    return acc;
+  }, {});
+
+  const sortedCountries = Object.keys(grouped).sort();
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Leagues</h1>
-
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search leagues..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-10"
-        />
-      </div>
-
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered?.map((league) => (
-            <Link key={league.id} to={`/leagues/${league.id}`}>
-              <Card className="transition-colors hover:bg-accent/50">
-                <CardContent className="flex items-center gap-4 p-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-lg font-bold">
-                    {league.name[0]}
-                  </div>
-                  <div>
-                    <CardTitle className="text-base">{league.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{league.country}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      )}
+      <h1 className="text-2xl font-bold">Leagues</h1>
+      {sortedCountries.map((country) => (
+        <section key={country}>
+          <h2 className="mb-3 text-lg font-semibold text-muted-foreground">{country}</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {grouped[country].map((l) => (
+              <Link key={l.id} to={`/leagues/${l.id}/overview`}>
+                <Card className="transition-colors hover:bg-accent/50 h-full">
+                  <CardContent className="flex items-center gap-3 p-4">
+                    <Trophy className="h-8 w-8 shrink-0 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">{l.name}</p>
+                      <p className="text-xs text-muted-foreground">{l.country}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ))}
     </div>
   );
 }

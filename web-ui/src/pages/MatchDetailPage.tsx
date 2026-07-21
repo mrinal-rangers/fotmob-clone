@@ -1,117 +1,100 @@
 import { useParams } from "react-router-dom";
-import { useMatch, useRecordGoal } from "@/hooks/use-matches";
-import { useCurrentUser } from "@/hooks/use-user";
-import { Card, CardContent, CardHeader, CardTitle } from "@/lib/shadcn-ui/card";
+import { useMatch } from "@/hooks/use-matches";
 import { Badge } from "@/lib/shadcn-ui/badge";
-import { Button } from "@/lib/shadcn-ui/button";
-import { Input } from "@/lib/shadcn-ui/input";
-import { useState } from "react";
-import { Trophy, Swords } from "lucide-react";
+import { Card, CardContent } from "@/lib/shadcn-ui/card";
+import { UnavailableCard, Skeleton, PageError } from "@/components/shared/ErrorStates";
+import { getStatusBadge } from "@/lib/utils";
+import { Calendar, MapPin, Clock } from "lucide-react";
 
 export function MatchDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { data: match, isLoading } = useMatch(id!);
-  const { data: user } = useCurrentUser();
-  const recordGoal = useRecordGoal(id!);
-  const [minute, setMinute] = useState("");
+  const { data: match, isLoading, error } = useMatch(id!);
 
   if (isLoading) {
-    return <div className="flex items-center justify-center py-12"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>;
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-60 w-full" />
+      </div>
+    );
   }
 
-  if (!match) return <div className="py-12 text-center text-muted-foreground">Match not found</div>;
+  if (error) return <PageError title="Match Not Found" description="This match could not be loaded." />;
+  if (!match) return <PageError title="Match Not Found" />;
 
-  const handleRecordGoal = async (teamId: string) => {
-    if (!minute) return;
-    try {
-      await recordGoal.mutateAsync({ teamId, playerId: "", minute: parseInt(minute) });
-      setMinute("");
-    } catch {}
-  };
+  const badge = getStatusBadge(match.status);
 
   return (
     <div className="space-y-6">
+      <div className="rounded-lg border bg-card p-6 text-center">
+        <div className="mb-2">
+          {badge && <Badge variant={badge.variant}>{badge.label}</Badge>}
+        </div>
+        <div className="flex items-center justify-center gap-8 py-6">
+          <div className="flex flex-col items-center gap-2 flex-1">
+            <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center text-xl font-bold">
+              {match.homeTeam?.shortName?.[0] || "H"}
+            </div>
+            <p className="font-semibold text-lg">{match.homeTeam?.name || match.homeTeamId}</p>
+          </div>
+          <div className="text-center">
+            <div className="text-5xl font-bold tabular-nums">
+              {match.homeScore ?? "-"}:{match.awayScore ?? "-"}
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">{match.round}</p>
+          </div>
+          <div className="flex flex-col items-center gap-2 flex-1">
+            <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center text-xl font-bold">
+              {match.awayTeam?.shortName?.[0] || "A"}
+            </div>
+            <p className="font-semibold text-lg">{match.awayTeam?.name || match.awayTeamId}</p>
+          </div>
+        </div>
+        <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <Calendar className="h-4 w-4" />
+            {new Date(match.kickoff).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+          </span>
+          <span className="flex items-center gap-1">
+            <Clock className="h-4 w-4" />
+            {new Date(match.kickoff).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+          </span>
+          {match.stadium && (
+            <span className="flex items-center gap-1">
+              <MapPin className="h-4 w-4" />
+              {match.stadium}
+            </span>
+          )}
+        </div>
+      </div>
+
       <Card>
         <CardContent className="p-6">
-          <div className="mb-4 text-center">
-            {match.status === "LIVE" ? (
-              <Badge variant="destructive" className="animate-pulse">LIVE</Badge>
-            ) : (
-              <Badge variant="secondary">{match.status}</Badge>
-            )}
-          </div>
-          <div className="flex items-center justify-center gap-8">
-            <div className="text-center">
-              <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-muted text-xl font-bold mx-auto">
-                {match.homeTeam?.shortName || match.homeTeamId?.slice(0, 2)}
-              </div>
-              <p className="font-semibold">{match.homeTeam?.name || match.homeTeamId}</p>
-            </div>
-            <div className="text-center">
-              <div className="text-5xl font-bold tabular-nums">
-                {match.homeScore ?? 0} : {match.awayScore ?? 0}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {new Date(match.kickoff).toLocaleDateString("en-GB", {
-                  weekday: "long", day: "numeric", month: "long", year: "numeric",
-                })}
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-muted text-xl font-bold mx-auto">
-                {match.awayTeam?.shortName || match.awayTeamId?.slice(0, 2)}
-              </div>
-              <p className="font-semibold">{match.awayTeam?.name || match.awayTeamId}</p>
-            </div>
-          </div>
+          <h3 className="font-semibold mb-4">Match Events</h3>
+          <UnavailableCard message="Match events coming soon" />
         </CardContent>
       </Card>
 
-      {match.events && match.events.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Swords className="h-5 w-5" /> Match Events
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {match.events.map((event) => (
-                <div key={event.id} className="flex items-center gap-3 text-sm">
-                  <Badge variant="outline" className="w-12 justify-center">{event.minute}'</Badge>
-                  <span>{event.player?.name || event.playerId}</span>
-                  <Trophy className="h-4 w-4 text-yellow-500" />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <Card>
+        <CardContent className="p-6">
+          <h3 className="font-semibold mb-4">Lineups</h3>
+          <UnavailableCard message="Lineups coming soon" />
+        </CardContent>
+      </Card>
 
-      {user?.isAdmin && match.status === "LIVE" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Record Goal</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-4">
-              <Input
-                type="number"
-                placeholder="Minute"
-                value={minute}
-                onChange={(e) => setMinute(e.target.value)}
-                className="w-24"
-              />
-              <Button onClick={() => handleRecordGoal(match.homeTeamId)} variant="outline">
-                {match.homeTeam?.name || "Home"} Goal
-              </Button>
-              <Button onClick={() => handleRecordGoal(match.awayTeamId)} variant="outline">
-                {match.awayTeam?.name || "Away"} Goal
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <Card>
+        <CardContent className="p-6">
+          <h3 className="font-semibold mb-4">Statistics</h3>
+          <UnavailableCard message="Match statistics coming soon" />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-6">
+          <h3 className="font-semibold mb-4">Head to Head</h3>
+          <UnavailableCard message="Head to head data coming soon" />
+        </CardContent>
+      </Card>
     </div>
   );
 }

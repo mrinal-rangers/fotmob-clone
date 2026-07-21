@@ -12,6 +12,7 @@ export interface Team {
   logoUrl?: string;
   leagueId: string;
   players?: Player[];
+  country?: string;
 }
 
 export interface Player {
@@ -20,6 +21,11 @@ export interface Player {
   position: string;
   number?: number;
   teamId: string;
+  nationality?: string;
+  age?: number;
+  height?: number;
+  preferredFoot?: string;
+  photoUrl?: string;
 }
 
 export interface Match {
@@ -33,6 +39,9 @@ export interface Match {
   awayScore?: number;
   homeTeam?: Team;
   awayTeam?: Team;
+  league?: League;
+  round?: string;
+  stadium?: string;
 }
 
 export interface Standing {
@@ -60,6 +69,10 @@ export interface MatchEvent {
   player?: Player;
   type: string;
   minute: number;
+  homeScore?: number;
+  awayScore?: number;
+  assistPlayerId?: string;
+  assistPlayerName?: string;
 }
 
 export interface User {
@@ -81,4 +94,50 @@ export interface Follow {
   entityType: "PLAYER" | "TEAM" | "LEAGUE" | "COUNTRY";
   entityId: string;
   entity?: Team | League | Player;
+}
+
+export interface LeagueDetail extends League {
+  seasons?: string[];
+  currentSeason?: string;
+}
+
+export interface PlayerDetail extends Player {
+  team?: Team;
+  nationality?: string;
+  age?: number;
+  height?: number;
+  preferredFoot?: string;
+  photoUrl?: string;
+  birthDate?: string;
+  positionDescription?: string;
+  recentMatches?: PlayerMatchPerformance[];
+  stats?: PlayerSeasonStats;
+}
+
+export interface PlayerMatchPerformance {
+  matchId: string;
+  matchDate: string;
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number;
+  awayScore: number;
+  minutesPlayed: number;
+  goals: number;
+  assists: number;
+  rating?: number;
+  competition?: string;
+}
+
+export interface PlayerSeasonStats {
+  appearances: number;
+  goals: number;
+  assists: number;
+  minutes: number;
+  rating?: number;
+  cleanSheets?: number;
+  saves?: number;
+  tackles?: number;
+  passes?: number;
+  keyPasses?: number;
+  dribbles?: number;
 }

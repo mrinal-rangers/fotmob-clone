@@ -2,10 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchLeagues, fetchLeague } from "@/lib/api";
 
 export function useLeagues() {
-  return useQuery({
-    queryKey: ["leagues"],
-    queryFn: fetchLeagues,
-  });
+  return useQuery({ queryKey: ["leagues"], queryFn: fetchLeagues });
 }
 
 export function useLeague(id: string) {

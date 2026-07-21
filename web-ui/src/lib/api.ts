@@ -1,15 +1,10 @@
 import type { League, Team, Player, Match, Standing, MatchEvent, User, Follow } from "@/types/api";
+import { getToken } from "@/lib/auth";
 
 const BFF_URL = import.meta.env.VITE_BFF_URL || "http://localhost:4001";
 
-let getTokenFn: (() => Promise<string | null>) | null = null;
-
-export function setTokenProvider(fn: () => Promise<string | null>) {
-  getTokenFn = fn;
-}
-
 async function bffFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = getTokenFn ? await getTokenFn() : null;
+  const token = await getToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string> || {}),

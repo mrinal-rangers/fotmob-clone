@@ -1,41 +1,50 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "@clerk/clerk-react";
-import { setTokenProvider } from "@/lib/api";
-import { useEffect } from "react";
-import { RootLayout } from "@/layouts/root-layout";
-import { LoginPage } from "@/pages/LoginPage";
+import { Routes, Route } from "react-router-dom";
+import { RootLayout } from "@/components/layout";
 import { HomePage } from "@/pages/HomePage";
 import { LeaguesPage } from "@/pages/LeaguesPage";
-import { LeagueDetailPage } from "@/pages/LeagueDetailPage";
+import { LeagueLayout, LeagueOverviewPage, LeagueTablePage, LeagueFixturesPage, LeagueStatsPage, LeagueTransfersPage, LeagueSeasonsPage, LeagueNewsPage } from "@/pages/league";
+import { TeamLayout, TeamOverviewPage, TeamSquadPage, TeamFixturesPage, TeamTablePage } from "@/pages/team";
 import { MatchDetailPage } from "@/pages/MatchDetailPage";
-import { TeamDetailPage } from "@/pages/TeamDetailPage";
-import { FollowingPage } from "@/pages/FollowingPage";
+import { PlayerDetailPage } from "@/pages/PlayerDetailPage";
+import { MatchesPage } from "@/pages/MatchesPage";
+import { NewsPage } from "@/pages/NewsPage";
+import { TransfersPage } from "@/pages/TransfersPage";
+import { SearchPage } from "@/pages/SearchPage";
 import { SettingsPage } from "@/pages/SettingsPage";
-
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isLoaded, isSignedIn } = useAuth();
-  if (!isLoaded) return <div className="flex h-screen items-center justify-center">Loading...</div>;
-  if (!isSignedIn) return <Navigate to="/login" replace />;
-  return <RootLayout>{children}</RootLayout>;
-}
+import { PageError } from "@/components/shared/ErrorStates";
 
 export default function App() {
-  const { getToken } = useAuth();
-
-  useEffect(() => {
-    setTokenProvider(() => getToken({ template: undefined }));
-  }, [getToken]);
-
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-      <Route path="/leagues" element={<ProtectedRoute><LeaguesPage /></ProtectedRoute>} />
-      <Route path="/leagues/:id" element={<ProtectedRoute><LeagueDetailPage /></ProtectedRoute>} />
-      <Route path="/matches/:id" element={<ProtectedRoute><MatchDetailPage /></ProtectedRoute>} />
-      <Route path="/teams/:id" element={<ProtectedRoute><TeamDetailPage /></ProtectedRoute>} />
-      <Route path="/following" element={<ProtectedRoute><FollowingPage /></ProtectedRoute>} />
-      <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+      <Route element={<RootLayout />}>
+        <Route index element={<HomePage />} />
+        <Route path="leagues" element={<LeaguesPage />} />
+        <Route path="leagues/:id" element={<LeagueLayout />}>
+          <Route index element={<LeagueOverviewPage />} />
+          <Route path="overview" element={<LeagueOverviewPage />} />
+          <Route path="table" element={<LeagueTablePage />} />
+          <Route path="fixtures" element={<LeagueFixturesPage />} />
+          <Route path="stats" element={<LeagueStatsPage />} />
+          <Route path="transfers" element={<LeagueTransfersPage />} />
+          <Route path="seasons" element={<LeagueSeasonsPage />} />
+          <Route path="news" element={<LeagueNewsPage />} />
+        </Route>
+        <Route path="teams/:id" element={<TeamLayout />}>
+          <Route index element={<TeamOverviewPage />} />
+          <Route path="overview" element={<TeamOverviewPage />} />
+          <Route path="squad" element={<TeamSquadPage />} />
+          <Route path="fixtures" element={<TeamFixturesPage />} />
+          <Route path="table" element={<TeamTablePage />} />
+        </Route>
+        <Route path="matches" element={<MatchesPage />} />
+        <Route path="matches/:id" element={<MatchDetailPage />} />
+        <Route path="players/:id" element={<PlayerDetailPage />} />
+        <Route path="news" element={<NewsPage />} />
+        <Route path="transfers" element={<TransfersPage />} />
+        <Route path="search" element={<SearchPage />} />
+        <Route path="settings" element={<SettingsPage />} />
+        <Route path="*" element={<PageError title="Page Not Found" description="The page you're looking for doesn't exist." />} />
+      </Route>
     </Routes>
   );
 }
